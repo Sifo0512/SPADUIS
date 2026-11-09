@@ -1,0 +1,87 @@
+/* Tema del módulo "Reportes por riesgo".
+   Todo cuelga de la clase .rr-theme (la ponen las páginas del módulo en su elemento raíz),
+   así las variables y botones NO afectan al resto de la aplicación ni chocan con la librería.
+   LIB: cuando se reemplacen los botones y campos por los de la librería, este archivo se va
+   reduciendo hasta poder borrarse. */
+
+.rr-theme {
+  --green: #2f6b00;
+  --green-dark: #2a5a00;
+  --green-soft: #eaf4dc;
+  --text: #1e1e1e;
+  --text-muted: #666;
+  --border: #dcdcdc;
+  --border-strong: #8a8a8a;
+  --surface: #fff;
+  --hover: #f3f5ef;
+  --active: #eef0e7;
+  --danger: #b3261e;
+  --field-bg: #f2f2f2;
+
+  font-size: 14px;
+  color: var(--text);
+
+  &,
+  & *,
+  & *::before,
+  & *::after {
+    box-sizing: border-box;
+  }
+
+  button {
+    font-family: inherit;
+  }
+
+  /* LIB: botones "pill" (Ayuda, Cancelar, Guardar...). Reemplazar por el button de la librería:
+     outlined = "Cancelar"/"Ayuda", filled/primary = "Guardar", peligro = "Eliminar", text = "Cancelar" en confirmaciones. */
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 20px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-dark);
+    background: var(--surface);
+    border: 1px solid var(--text);
+    border-radius: 999px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--green-soft);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    &--filled {
+      color: #fff;
+      background: var(--green);
+      border-color: var(--green);
+
+      &:hover:not(:disabled) {
+        background: var(--green-dark);
+      }
+    }
+
+    &--danger {
+      color: #fff;
+      background: var(--danger);
+      border-color: var(--danger);
+
+      &:hover:not(:disabled) {
+        background: #8f1d17;
+      }
+    }
+
+    &--text {
+      background: transparent;
+      border-color: transparent;
+    }
+  }
+}

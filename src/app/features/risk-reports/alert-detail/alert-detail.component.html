@@ -1,0 +1,126 @@
+<!-- LIB: barra superior de la vista (flecha + persona + acciones). -->
+<header class="bar">
+  <button type="button" class="back" aria-label="Volver" (click)="goToList()">
+    <app-icon name="arrow-left" />
+  </button>
+
+  @if (alert(); as a) {
+    <span class="avatar avatar--sm" aria-hidden="true"><app-icon name="user" /></span>
+    <div class="bar__who">
+      <strong>{{ a.documentType }} - {{ a.documentNumber }} - {{ a.studentName.toUpperCase() }}</strong>
+      <span>{{ a.programName }}| <b>Urgencia:</b> {{ a.urgency }}</span>
+    </div>
+
+    @if (!readOnly()) {
+      <div class="bar__actions">
+        <!-- LIB: botón outlined con ícono (Anular) y botón primary con ícono (Guardar) -->
+        <button type="button" class="btn-pill" [disabled]="saving()" (click)="openCancel()">
+          <app-icon name="close" style="--icon-size: 14px" /> Anular reporte
+        </button>
+        <button type="submit" form="intervention-form" class="btn-pill btn-pill--filled" [disabled]="saving()">
+          <app-icon name="check" style="--icon-size: 14px" /> {{ saving() ? 'Guardando...' : 'Guardar intervención' }}
+        </button>
+      </div>
+    }
+  }
+</header>
+
+<section class="page">
+  @if (loading()) {
+    <p class="state" role="status">Cargando alerta...</p>
+  } @else if (loadError()) {
+    <p class="alert alert--error" role="alert">{{ loadError() }}</p>
+  } @else if (alert(); as a) {
+    <!-- LIB: contenedor con borde redondeado -> card / panel / surface -->
+    <section class="card">
+      <h2>Reporte de riesgo</h2>
+      <p class="lead">
+        Digite la <strong>información del reporte</strong> para enviarlo a revisión por un coordinador.
+      </p>
+
+      <!-- ============ Información del estudiante ============ -->
+      <h3 class="section-title"><app-icon name="graduation-cap" /> Información del estudiante</h3>
+      <div class="student">
+        <!-- BACK: foto del estudiante (a.photoUrl). Mientras no exista, iniciales. -->
+        <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+        <dl class="data data--student">
+          <div><dt>Estudiante:</dt> <dd>{{ a.studentCode }} - {{ a.studentName }}</dd></div>
+          <div><dt>No. documento:</dt> <dd>{{ a.documentType }} - {{ a.documentNumber }}</dd></div>
+          <div><dt>Programa:</dt> <dd>{{ a.programName }}</dd></div>
+          <div><dt>Nivel académico:</dt> <dd>{{ a.academicLevel }}</dd></div>
+        </dl>
+      </div>
+
+      <!-- ============ Datos del reporte ============ -->
+      <h3 class="section-title section-title--spaced"><app-icon name="file-text" /> Datos del reporte</h3>
+      <dl class="data data--report">
+        <div><dt>Nombre del reportante:</dt> <dd>{{ a.reporterName }}</dd></div>
+        <div><dt>Relación con el estudiante:</dt> <dd>{{ a.relation }}</dd></div>
+        <div><dt>Categoría de riesgo:</dt> <dd>{{ a.category }}</dd></div>
+        <div><dt>Canal de recepción:</dt> <dd>{{ a.channel }}</dd></div>
+        <div><dt>Nivel de urgencia:</dt> <dd>{{ a.urgency }}</dd></div>
+      </dl>
+      <p class="description"><strong>Descripción del caso:</strong><br />{{ a.description }}</p>
+
+      <!-- ============ Intervención ============ -->
+      <h3 class="section-title section-title--spaced"><app-icon name="file-text" /> Intervención</h3>
+
+      @if (readOnly()) {
+        <dl class="data data--report">
+          <div><dt>Estado resultante:</dt> <dd>{{ a.resultStatus ? statusLabel(a.resultStatus) : '--' }}</dd></div>
+        </dl>
+        <p class="description"><strong>Notas de la intervención:</strong><br />{{ a.notes || '--' }}</p>
+      } @else {
+        <!-- novalidate: las validaciones las hace Angular, no el navegador. -->
+        <form id="intervention-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+          <!-- LIB: select. BACK: opciones = estados que puede elegir el usuario (RESULT_STATUS_OPTIONS). -->
+          <app-field
+            label="Estado resultante"
+            icon="shapes"
+            kind="select"
+            controlId="result-status"
+            [control]="form.controls.resultStatus"
+          >
+            <select id="result-status" formControlName="resultStatus">
+              <option value="" disabled hidden></option>
+              @for (o of resultOptions; track o.id) {
+                <option [value]="o.id">{{ o.label }}</option>
+              }
+            </select>
+          </app-field>
+
+          <div class="block">
+            <!-- LIB: textarea con contador de caracteres -->
+            <app-field
+              label="Notas de la intervención"
+              kind="textarea"
+              controlId="notes"
+              [control]="form.controls.notes"
+              [counterMax]="notesMax"
+            >
+              <textarea id="notes" formControlName="notes" [attr.maxlength]="notesMax"></textarea>
+            </app-field>
+          </div>
+        </form>
+      }
+
+      @if (submitError()) {
+        <p class="alert alert--error" role="alert">{{ submitError() }}</p>
+      }
+    </section>
+  }
+</section>
+
+@if (confirmCancel()) {
+  <!-- LIB: dialog de confirmación de la librería. -->
+  <app-dialog title="Anular reporte" tone="neutral" size="sm" [closable]="false" (closed)="closeCancel()">
+    <p class="confirm-text">Está por anular este reporte de riesgo ¿Desea continuar?</p>
+
+    <button dialogFooter data-autofocus type="button" class="btn-pill btn-pill--text" [disabled]="saving()" (click)="closeCancel()">
+      Cancelar
+    </button>
+    <button dialogFooter type="button" class="btn-pill btn-pill--danger" [disabled]="saving()" (click)="confirmCancelReport()">
+      {{ saving() ? 'Anulando...' : 'Anular' }}
+    </button>
+  </app-dialog>
+}

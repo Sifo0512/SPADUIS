@@ -1,0 +1,58 @@
+<div class="table-wrap" [class.is-loading]="loading()" [attr.aria-busy]="loading()">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Estudiante</th>
+        <th scope="col">Código</th>
+        <th scope="col">Nivel de riesgo</th>
+        <th scope="col" class="col-actions">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr>
+          <!-- LIB: en las columnas de mat-table-full, este texto se arma con
+               documentType - documentNumber - fullName (valor calculado o celda custom). -->
+          <td class="col-student">{{ row.documentType }} - {{ row.documentNumber }} - {{ row.fullName }}</td>
+          <td>{{ row.code }}</td>
+          <td><app-risk-tag [level]="row.risk" /></td>
+          <td class="col-actions">
+            <button type="button" class="icon-btn" aria-label="Ver detalle" (click)="view.emit(row)">
+              <app-icon name="eye" />
+            </button>
+            <button type="button" class="icon-btn" aria-label="Crear registro" (click)="createRecord.emit(row)">
+              <app-icon name="file-plus" />
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="state">
+            {{ loading() ? 'Cargando estudiantes...' : 'No hay estudiantes para mostrar.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<footer class="paginator">
+  <label for="page-size">Registros por página:</label>
+  <span class="select-box">
+    <select id="page-size" [value]="pageSize()" (change)="onSizeChange($event)">
+      @for (opt of pageSizeOptions(); track opt) {
+        <option [value]="opt" [selected]="opt === pageSize()">{{ opt }}</option>
+      }
+    </select>
+    <app-icon name="chevron-down" style="--icon-size: 16px" />
+  </span>
+
+  <span class="range">{{ from() }}-{{ to() }} de {{ total() }}</span>
+
+  <button type="button" class="icon-btn nav" aria-label="Página anterior" [disabled]="!hasPrev()" (click)="go(-1)">
+    <app-icon name="chevron-left" />
+  </button>
+  <button type="button" class="icon-btn nav" aria-label="Página siguiente" [disabled]="!hasNext()" (click)="go(1)">
+    <app-icon name="chevron-right" />
+  </button>
+</footer>

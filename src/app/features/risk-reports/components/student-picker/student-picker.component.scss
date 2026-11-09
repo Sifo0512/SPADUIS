@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.picker {
+  position: relative;
+}
+
+.picker__list {
+  position: absolute;
+  top: 46px; /* justo debajo de la caja del campo */
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 260px;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 12%);
+}
+
+.picker__option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover,
+  &.is-active {
+    background: var(--hover);
+  }
+}
+
+.picker__sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.picker__state {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+
+  &--error {
+    color: var(--danger);
+  }
+}

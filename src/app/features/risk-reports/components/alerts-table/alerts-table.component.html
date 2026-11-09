@@ -1,0 +1,48 @@
+<div class="table-wrap" [class.is-loading]="loading()" [attr.aria-busy]="loading()">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Estudiante</th>
+        <th scope="col">Nivel</th>
+        <th scope="col">Tipo</th>
+        <th scope="col" class="num">Índice</th>
+        <th scope="col" class="num">Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr
+          class="row"
+          tabindex="0"
+          [attr.aria-label]="'Intervenir alerta de ' + row.studentName"
+          (click)="rowSelect.emit(row)"
+          (keydown.enter)="rowSelect.emit(row)"
+          (keydown.space)="$event.preventDefault(); rowSelect.emit(row)"
+        >
+          <td>{{ row.studentCode }} - {{ row.studentName }}</td>
+          <td><app-risk-tag [level]="row.level" /></td>
+          <td>{{ row.type }}</td>
+          <td class="num">{{ row.index | number: '1.2-2' }}</td>
+          <td class="num date">
+            <span>{{ splitDate(row.date).day }}</span>
+            <span>{{ splitDate(row.date).time }}</span>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="state">
+            {{ loading() ? 'Cargando alertas...' : 'No hay alertas para mostrar.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<app-paginator
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [pageSizeOptions]="pageSizeOptions()"
+  (pageChange)="pageChange.emit($event)"
+/>

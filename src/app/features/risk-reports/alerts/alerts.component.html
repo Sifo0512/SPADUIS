@@ -1,0 +1,72 @@
+<section class="page">
+  <!-- LIB: encabezado (page-header). La flecha de volver es una suposición: el mockup no la muestra
+       porque en el proyecto real el menú lateral de la aplicación ya permite navegar. -->
+  <app-page-header title="Gestionar alertas" [showBack]="true" (back)="goBack()" />
+
+  <div class="filters">
+    <!-- LIB: buscador (search-input) con botón de borrar -->
+    <app-search-input
+      class="filter-search"
+      placeholder="Buscar"
+      [value]="searchText()"
+      [clearable]="true"
+      (valueChange)="onSearch($event)"
+    />
+
+    <!-- LIB: datepicker compacto (un solo día). BACK: se envía como ?date=yyyy-MM-dd.
+         TODO: confirmar si "Fecha" es un día o un rango. -->
+    <label class="date-filter" [class.has-value]="!!date()">
+      <app-icon name="calendar" />
+      <span class="date-filter__label">Fecha</span>
+      <input type="date" aria-label="Filtrar por fecha" [value]="date()" (change)="onDate($event)" />
+    </label>
+
+    <!-- LIB: botón de texto con ícono -->
+    <button type="button" class="text-btn" [disabled]="!hasFilters()" (click)="clearFilters()">
+      <app-icon name="filter-off" /> Limpiar filtros
+    </button>
+
+    <!-- LIB: icon-button -->
+    <button type="button" class="refresh" aria-label="Actualizar" (click)="reload()">
+      <app-icon name="refresh" />
+    </button>
+  </div>
+
+  <!-- LIB: tabs / tab-group con contador (badge) en cada pestaña.
+       Se arma con botones role="tab" para mantener accesibilidad. -->
+  <div class="tabs" role="tablist" aria-label="Estado de las alertas">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.active]="tab.id === status()"
+        [attr.aria-selected]="tab.id === status()"
+        (click)="selectTab(tab.id)"
+      >
+        {{ tab.label }}
+        <span class="badge" [attr.aria-label]="counts()[tab.id] + ' alertas'">{{ counts()[tab.id] }}</span>
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="error" role="alert">
+      {{ error() }}
+      <button type="button" class="link-btn" (click)="reload()">Reintentar</button>
+    </p>
+  }
+
+  <!-- LIB: <app-mat-table-full [options]="tableOptions" (...)="onRowSelect($event)" /> -->
+  <app-alerts-table
+    role="tabpanel"
+    [rows]="alerts()"
+    [total]="total()"
+    [page]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions"
+    [loading]="loading()"
+    (pageChange)="onPageChange($event)"
+    (rowSelect)="onRowSelect($event)"
+  />
+</section>

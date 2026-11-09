@@ -1,0 +1,153 @@
+<section class="page">
+  <!-- LIB: encabezado con flecha de volver (page-header). -->
+  <app-page-header title="Crear reporte por riesgo" [showBack]="true" (back)="onCancel()" />
+
+  <!-- LIB: panel lateral derecho (sidenav / drawer). Se abre con el botón "Ayuda".
+       TODO: confirmar que la ayuda de esta pantalla muestre lo mismo que la del listado. -->
+  <app-help-drawer
+    [(open)]="helpOpen"
+    [ranges]="riskRanges()"
+    [loading]="rangesLoading()"
+    [error]="rangesError()"
+  />
+
+  <div class="top-actions">
+    <!-- LIB: botón outlined/pill con ícono -->
+    <button type="button" class="btn-pill" (click)="onHelp()">
+      Ayuda <app-icon name="help-circle" style="--icon-size: 14px" />
+    </button>
+  </div>
+
+  <!-- LIB: contenedor con borde redondeado -> card / panel / surface -->
+  <section class="card">
+    <h2>Reporte de riesgo</h2>
+    <p class="lead">
+      Digite la <strong>información del reporte</strong> para enviarlo a revisión por un coordinador.
+    </p>
+
+    @if (loadError()) {
+      <p class="alert alert--error" role="alert">{{ loadError() }}</p>
+    }
+
+    <!-- novalidate: las validaciones las hace Angular, no el navegador. -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <!-- ============ Información del estudiante ============ -->
+      <h3 class="section-title"><app-icon name="graduation-cap" /> Información del estudiante</h3>
+
+      <!-- LIB: autocomplete (ver student-picker.component.ts).
+           BACK: la búsqueda llama a RiskReportsService.searchStudents(). -->
+      <app-student-picker [control]="form.controls.student" />
+
+      <!-- ============ Datos del reporte ============ -->
+      <h3 class="section-title section-title--spaced"><app-icon name="file-text" /> Datos del reporte</h3>
+
+      <div class="grid grid--2">
+        <!-- LIB: input de texto -->
+        <app-field label="Nombre del reportante" icon="tag" controlId="reporter-name" [control]="form.controls.reporterName">
+          <input
+            id="reporter-name"
+            type="text"
+            formControlName="reporterName"
+            autocomplete="off"
+            [attr.maxlength]="reporterMax"
+          />
+        </app-field>
+
+        <!-- LIB: select. BACK: opciones = catalogs().relations (GET /risk-reports/catalogs). -->
+        <app-field
+          label="Relación con el estudiante"
+          icon="users"
+          kind="select"
+          controlId="relation"
+          [control]="form.controls.relationId"
+        >
+          <select id="relation" formControlName="relationId">
+            <option value="" disabled hidden></option>
+            @for (o of catalogs().relations; track o.id) {
+              <option [value]="o.id">{{ o.name }}</option>
+            }
+          </select>
+        </app-field>
+      </div>
+
+      <div class="grid grid--3">
+        <!-- LIB: select. BACK: opciones = catalogs().categories -->
+        <app-field
+          label="Categoría de riesgo"
+          icon="shapes"
+          kind="select"
+          controlId="category"
+          [control]="form.controls.categoryId"
+        >
+          <select id="category" formControlName="categoryId">
+            <option value="" disabled hidden></option>
+            @for (o of catalogs().categories; track o.id) {
+              <option [value]="o.id">{{ o.name }}</option>
+            }
+          </select>
+        </app-field>
+
+        <!-- LIB: select. BACK: opciones = catalogs().channels -->
+        <app-field
+          label="Canal de recepción"
+          icon="inbox"
+          kind="select"
+          controlId="channel"
+          [control]="form.controls.channelId"
+        >
+          <select id="channel" formControlName="channelId">
+            <option value="" disabled hidden></option>
+            @for (o of catalogs().channels; track o.id) {
+              <option [value]="o.id">{{ o.name }}</option>
+            }
+          </select>
+        </app-field>
+
+        <!-- LIB: select. BACK: opciones = catalogs().urgencies -->
+        <app-field
+          label="Nivel de urgencia"
+          icon="bar-chart"
+          kind="select"
+          controlId="urgency"
+          [control]="form.controls.urgencyId"
+        >
+          <select id="urgency" formControlName="urgencyId">
+            <option value="" disabled hidden></option>
+            @for (o of catalogs().urgencies; track o.id) {
+              <option [value]="o.id">{{ o.name }}</option>
+            }
+          </select>
+        </app-field>
+      </div>
+
+      <div class="block">
+        <!-- LIB: textarea con contador de caracteres -->
+        <app-field
+          label="Descripción del caso"
+          kind="textarea"
+          controlId="description"
+          [control]="form.controls.description"
+          [counterMax]="descriptionMax"
+        >
+          <textarea id="description" formControlName="description" [attr.maxlength]="descriptionMax"></textarea>
+        </app-field>
+      </div>
+
+      @if (success()) {
+        <!-- LIB: alert / snackbar de éxito -->
+        <p class="alert alert--success" role="status">El reporte se envió a revisión correctamente.</p>
+      }
+      @if (submitError()) {
+        <p class="alert alert--error" role="alert">{{ submitError() }}</p>
+      }
+
+      <div class="actions">
+        <!-- LIB: botón outlined (Cancelar) y botón primary/filled (Guardar y enviar) -->
+        <button type="button" class="btn-pill" [disabled]="saving()" (click)="onCancel()">Cancelar</button>
+        <button type="submit" class="btn-pill btn-pill--filled" [disabled]="saving()">
+          {{ saving() ? 'Enviando...' : 'Guardar y enviar' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</section>

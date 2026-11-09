@@ -1,0 +1,203 @@
+<header class="bar">
+  <button type="button" class="back" aria-label="Volver" (click)="goBack()"><app-icon name="arrow-left" /></button>
+  <h1>Riesgo de deserción</h1>
+  <div class="bar__actions">
+    @if (data()) {
+      <button type="button" class="btn-pill" [disabled]="exporting() !== null" (click)="exportOne()">
+        <app-icon name="download" style="--icon-size: 14px" />
+        {{ exporting() === 'one' ? 'Generando...' : 'Excel de este estudiante' }}
+      </button>
+    }
+    <button type="button" class="btn-pill btn-pill--filled" [disabled]="exporting() !== null" (click)="exportAll()">
+      <app-icon name="sheet" style="--icon-size: 14px" />
+      {{ exporting() === 'all' ? 'Generando...' : 'Exportar todas las variables' }}
+    </button>
+  </div>
+</header>
+
+<section class="page">
+  <div class="card search">
+    <p class="lead">Consulte un estudiante por <strong>nombre, código o documento</strong>.</p>
+    <app-student-picker [control]="picker" />
+  </div>
+
+  @if (exportError(); as e) {
+    <p class="alert alert--error" role="alert">{{ e }}</p>
+  }
+  @if (error(); as e) {
+    <p class="alert alert--error" role="alert">{{ e }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state" role="status">Cargando estudiante...</p>
+  } @else if (data(); as d) {
+    @if (d.risk.alarm) {
+      <div class="alarm" role="alert">
+        <app-icon name="alert-triangle" />
+        <div>
+          <strong>Alerta de riesgo de deserción</strong>
+          <span>El índice ({{ d.risk.index.toFixed(2) }}) supera el umbral de {{ d.risk.alarmThreshold.toFixed(2) }}.</span>
+        </div>
+      </div>
+    }
+
+    <!-- ===== Información del estudiante + índice ===== -->
+    <section class="card top">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">{{ initials(d.student.fullName) }}</span>
+        <dl class="data">
+          <div><dt>Estudiante:</dt> <dd>{{ d.student.code }} - {{ d.student.fullName }}</dd></div>
+          <div><dt>Documento:</dt> <dd>{{ d.student.documentType }} - {{ d.student.documentNumber }}</dd></div>
+          <div><dt>Programa:</dt> <dd>{{ d.student.programName }}</dd></div>
+          <div><dt>Facultad:</dt> <dd>{{ d.student.facultyName || '--' }}</dd></div>
+          <div><dt>Nivel académico:</dt> <dd>{{ d.student.academicLevel ?? '--' }}</dd></div>
+          <div><dt>Correo:</dt> <dd>{{ d.student.email || '--' }}</dd></div>
+          <div><dt>Teléfono:</dt> <dd>{{ d.student.phone || '--' }}</dd></div>
+          <div><dt>Ingreso:</dt> <dd>{{ d.student.admissionDate || '--' }}</dd></div>
+        </dl>
+        <button type="button" class="link" (click)="openDimension('identificacion')">
+          Ver datos de identificación
+        </button>
+      </div>
+
+      <div class="index index--{{ tone(d.risk.level) }}">
+        <span class="index__label">Índice de riesgo</span>
+        <strong class="index__value">{{ d.risk.index.toFixed(2) }}</strong>
+        <app-risk-tag [level]="level(d.risk.level)" />
+        <button type="button" class="btn-pill" (click)="openCalculation()">
+          <app-icon name="calculator" style="--icon-size: 14px" /> Cálculo del índice
+        </button>
+        @if (!d.risk.interceptCalibrated) {
+          <small class="muted">Intercepto del modelo sin calibrar (provisional).</small>
+        }
+      </div>
+    </section>
+
+    <!-- ===== Resumen general ===== -->
+    <h2 class="title">Resumen general</h2>
+    <div class="summary">
+      @for (v of d.summary; track v.key) {
+        <div class="stat">
+          <span>{{ v.label }}</span>
+          <strong [class.masked]="v.masked">
+            @if (v.masked) { <app-icon name="lock" style="--icon-size: 13px" /> }
+            {{ v.value }}
+          </strong>
+        </div>
+      }
+    </div>
+
+    <!-- ===== Dimensiones ===== -->
+    <h2 class="title">Variables por dimensión</h2>
+    <div class="dims">
+      @for (c of d.dimensions; track c.id) {
+        @if (c.id !== 'identificacion') {
+          <article [class]="'card dim risk-' + tone(c.level)" [attr.data-dim]="c.id">            
+            <header>
+              <span class="dim__icon"><app-icon [name]="c.id === 'academica' ? 'graduation-cap' : c.id === 'financiera' ? 'wallet' : 'heart'" /></span>
+              <h3>{{ c.title }}</h3>
+              @if (c.level) { <app-risk-tag [level]="level(c.level)" /> }
+            </header>
+            @if (c.index !== null) {
+              <div class="gauge">
+                <span class="gauge__num">{{ c.index.toFixed(2) }}<small>/1.00</small></span>
+                <div class="bar-track" role="img" [attr.aria-label]="'Índice ' + c.index.toFixed(2)">
+                  <div class="bar-fill bar-fill--{{ tone(c.level) }}" [style.width.%]="pct(c.index)"></div>
+                </div>
+              </div>
+            }
+            <dl class="highlights">
+              @for (h of c.highlights; track h.key) {
+                <div>
+                  <dt>{{ h.label }}</dt>
+                  <dd [class.masked]="h.masked">
+                    @if (h.masked) { <app-icon name="lock" style="--icon-size: 12px" /> }
+                    {{ h.value }}
+                  </dd>
+                </div>
+              }
+            </dl>
+            <button type="button" class="btn-pill" (click)="openDimension(c.id)">
+              Ver todas las variables ({{ c.variableCount }})
+            </button>
+          </article>
+        }
+      }
+    </div>
+  } @else if (!error()) {
+    <p class="state">Busque un estudiante para ver su dashboard.</p>
+  }
+</section>
+
+<!-- ===== Diálogo: variables de una dimensión ===== -->
+@if (dimensionLoading() || dimension()) {
+  <app-dialog [title]="dimension()?.title ?? 'Cargando...'" size="lg" (closed)="closeDimension()">
+    @if (dimension(); as dim) {
+      @if (dim.index !== null) {
+        <p class="dlg-lead">
+          Índice parcial de la dimensión: <strong>{{ dim.index.toFixed(2) }}</strong>
+          <app-risk-tag [level]="level(dim.level)" />
+        </p>
+      }
+      @if (dim.hasMasked) {
+        <p class="dlg-note"><app-icon name="lock" style="--icon-size: 13px" /> Algunas variables son restringidas (solo Bienestar / consejería).</p>
+      }
+      <dl class="vars">
+        @for (v of dim.variables; track v.key) {
+          <div class="vars__row">
+            <dt>
+              {{ v.label }}
+              @if (v.derived) { <em>derivada</em> }
+              @if (v.extra) { <em>extra</em> }
+            </dt>
+            <dd [class.masked]="v.masked">
+              @if (v.masked) { <app-icon name="lock" style="--icon-size: 12px" /> }
+              {{ v.value }}
+            </dd>
+          </div>
+        }
+      </dl>
+    } @else {
+      <p class="state" role="status">Cargando variables...</p>
+    }
+    <button dialogFooter type="button" class="btn-pill btn-pill--filled" (click)="closeDimension()">Cerrar</button>
+  </app-dialog>
+}
+
+<!-- ===== Diálogo: cálculo del índice ===== -->
+@if (calculationOpen()) {
+  <app-dialog title="Cálculo del índice de riesgo" size="lg" (closed)="closeCalculation()">
+    @if (calculation(); as c) {
+      <p class="dlg-lead">
+        índice = 1 / (1 + e<sup>−(intercepto + Σ coeficiente · x)</sup>) &nbsp;→&nbsp;
+        <strong>{{ c.index.toFixed(2) }}</strong> <app-risk-tag [level]="level(c.level)" />
+      </p>
+      <p class="dlg-note">
+        Intercepto: {{ c.intercept.toFixed(3) }}{{ c.interceptCalibrated ? '' : ' (provisional)' }} ·
+        Logit: {{ c.logit.toFixed(3) }}
+      </p>
+      <div class="table-wrap">
+        <table class="terms">
+          <thead>
+            <tr><th>Variable</th><th>Regla</th><th>Valor</th><th>OR</th><th>Aplica</th><th>Aporte</th></tr>
+          </thead>
+          <tbody>
+            @for (t of c.terms; track t.code) {
+              <tr [class.on]="t.applies">
+                <td>{{ t.variableLabel }}</td>
+                <td>{{ t.rule }}</td>
+                <td>{{ t.value }}</td>
+                <td>{{ t.oddsRatio.toFixed(2) }}</td>
+                <td>{{ t.masked ? 'Restringido' : !t.dataAvailable ? 'Sin dato' : t.applies ? 'Sí' : 'No' }}</td>
+                <td>{{ t.contribution === null ? '--' : t.contribution.toFixed(3) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="state" role="status">Calculando...</p>
+    }
+    <button dialogFooter type="button" class="btn-pill btn-pill--filled" (click)="closeCalculation()">Cerrar</button>
+  </app-dialog>
+}

@@ -1,0 +1,108 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgb(0 0 0 / 35%);
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+  outline: 0;
+  transform: translate(-50%, -50%);
+
+  &--sm {
+    width: min(440px, calc(100vw - 32px));
+  }
+
+  &--lg {
+    width: min(760px, calc(100vw - 32px));
+  }
+
+  /* Minimizada: solo la barra del título, abajo a la derecha. */
+  &.is-minimized {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    width: 320px;
+    transform: none;
+  }
+}
+
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 14px 24px;
+  border-bottom: 1px solid var(--border);
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+}
+
+.dialog--neutral .dialog__header h2 {
+  color: var(--text);
+}
+
+.dialog.is-minimized .dialog__header {
+  border-bottom: 0;
+}
+
+.dialog__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tool {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--green);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--green-soft);
+  }
+}
+
+.dialog__body {
+  padding: 20px 24px 8px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 24px 20px;
+
+  &--center {
+    justify-content: center;
+  }
+}
+
+.dialog.is-minimized .dialog__body,
+.dialog.is-minimized .dialog__footer {
+  display: none;
+}

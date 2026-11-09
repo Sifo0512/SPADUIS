@@ -1,0 +1,99 @@
+<section class="page">
+  <!-- LIB: encabezado con flecha de volver (page-header). -->
+  <app-page-header
+    title="Configuración de parámetros de índice de riesgo"
+    [showBack]="true"
+    (back)="goBack()"
+  />
+
+  <div class="layout" [class.collapsed]="sidebarCollapsed()">
+    <!-- LIB: panel lateral con lista de configuraciones (ver side-list.component.ts). -->
+    <app-side-list
+      class="sidebar"
+      title="Listado de configuraciones"
+      [items]="sections"
+      [selectedId]="selectedId()"
+      [collapsed]="sidebarCollapsed()"
+      (itemSelect)="onSelectSection($event)"
+      (toggleCollapse)="toggleSidebar()"
+    />
+
+    <!-- LIB: contenedor con borde redondeado -> card / panel / surface -->
+    <section class="panel">
+      <h2>Listado de {{ selectedSection().label.toLowerCase() }}</h2>
+
+      @if (selectedId() === 'care-teams') {
+        <div class="filters">
+          <!-- LIB: buscador (search-input) -->
+          <app-search-input
+            class="filter-search"
+            variant="underline"
+            placeholder="Filtrar registros"
+            (valueChange)="onSearch($event)"
+          />
+
+          <!-- LIB: botón primary. Equivale al @Output add de mat-table-full.
+               TODO: el mockup no muestra cómo se crea un equipo; este botón es una suposición. -->
+          <button type="button" class="btn-pill btn-pill--filled" (click)="openCreate()">Crear equipo</button>
+        </div>
+
+        @if (error()) {
+          <p class="error" role="alert">
+            {{ error() }}
+            <button type="button" class="link-btn" (click)="reload()">Reintentar</button>
+          </p>
+        }
+
+        <!-- LIB: <app-mat-table-full [options]="tableOptions" (edit)="openEdit($event)" (delete)="openDelete($event)" ... /> -->
+        <app-care-teams-table
+          [rows]="teams()"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          [loading]="loading()"
+          (pageChange)="onPageChange($event)"
+          (edit)="openEdit($event)"
+          (remove)="openDelete($event)"
+        />
+      } @else {
+        <!-- TODO: construir "Agentes", "Categorías de riesgo" y "Parámetros de alerta" cuando haya mockup.
+             Cada una tendrá su propio servicio (BACK) y su tabla (LIB). -->
+        <p class="placeholder" role="status">
+          La configuración de «{{ selectedSection().label }}» todavía no está disponible.
+        </p>
+      }
+    </section>
+  </div>
+
+  <!-- ============ Diálogos ============ -->
+
+  @if (formOpen()) {
+    <app-care-team-dialog
+      [team]="editingTeam()"
+      [saving]="working()"
+      [error]="dialogError()"
+      (save)="onSave($event)"
+      (dismiss)="closeForm()"
+    />
+  }
+
+  @if (deletingTeam(); as team) {
+    <!-- LIB: dialog de confirmación de la librería. -->
+    <app-dialog title="Eliminar equipo" tone="neutral" size="sm" [closable]="false" (closed)="closeDelete()">
+      <p class="confirm-text">Está por eliminar el equipo <strong>{{ team.name }}</strong> ¿Desea continuar?</p>
+
+      @if (dialogError()) {
+        <p class="error" role="alert">{{ dialogError() }}</p>
+      }
+
+      <!-- LIB: "Cancelar" como botón de texto y "Eliminar" como botón de peligro/rojo. -->
+      <button dialogFooter data-autofocus type="button" class="btn-pill btn-pill--text" [disabled]="working()" (click)="closeDelete()">
+        Cancelar
+      </button>
+      <button dialogFooter type="button" class="btn-pill btn-pill--danger" [disabled]="working()" (click)="confirmDelete()">
+        {{ working() ? 'Eliminando...' : 'Eliminar' }}
+      </button>
+    </app-dialog>
+  }
+</section>

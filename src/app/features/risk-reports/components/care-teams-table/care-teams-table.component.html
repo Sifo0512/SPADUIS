@@ -1,0 +1,43 @@
+<div class="table-wrap" [class.is-loading]="loading()" [attr.aria-busy]="loading()">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Nombre</th>
+        <th scope="col">Fecha desde</th>
+        <th scope="col">Fecha hasta</th>
+        <th scope="col" class="col-actions">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ formatDate(row.validFrom) }}</td>
+          <td>{{ formatDate(row.validTo) }}</td>
+          <td class="col-actions">
+            <button type="button" class="icon-btn" [attr.aria-label]="'Editar equipo ' + row.name" (click)="edit.emit(row)">
+              <app-icon name="edit" />
+            </button>
+            <button type="button" class="icon-btn" [attr.aria-label]="'Eliminar equipo ' + row.name" (click)="remove.emit(row)">
+              <app-icon name="trash" />
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="state">
+            {{ loading() ? 'Cargando equipos...' : 'No hay equipos para mostrar.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<app-paginator
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [pageSizeOptions]="pageSizeOptions()"
+  (pageChange)="pageChange.emit($event)"
+/>

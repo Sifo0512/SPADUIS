@@ -1,0 +1,55 @@
+<div class="picker">
+  <!-- LIB: este bloque completo es el autocomplete de la librería. -->
+  <app-field
+    label="Nombre y/o código del estudiante"
+    icon="tag"
+    controlId="student-search"
+    requiredMessage="Busca y elige un estudiante de la lista."
+    [control]="control()"
+    [filled]="text().length > 0"
+  >
+    <input
+      id="student-search"
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      aria-autocomplete="list"
+      aria-controls="student-search-list"
+      [attr.aria-expanded]="open()"
+      [attr.aria-activedescendant]="activeIndex() >= 0 ? 'student-option-' + activeIndex() : null"
+      [value]="text()"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (keydown)="onKeydown($event)"
+    />
+  </app-field>
+
+  @if (open() && trimmed().length > 0) {
+    <ul class="picker__list" id="student-search-list" role="listbox" aria-label="Estudiantes encontrados">
+      @if (trimmed().length < 2) {
+        <li class="picker__state">Escribe al menos 2 caracteres.</li>
+      } @else if (failed()) {
+        <li class="picker__state picker__state--error">No se pudo buscar estudiantes. Intenta de nuevo.</li>
+      } @else if (searchedTerm() !== trimmed()) {
+        <li class="picker__state">Buscando...</li>
+      } @else {
+        @for (s of options(); track s.id; let i = $index) {
+          <li
+            role="option"
+            class="picker__option"
+            [id]="'student-option-' + i"
+            [class.is-active]="i === activeIndex()"
+            [attr.aria-selected]="i === activeIndex()"
+            (mousedown)="choose(s, $event)"
+          >
+            <span class="picker__main">{{ s.documentType }} - {{ s.documentNumber }} - {{ s.fullName }}</span>
+            <span class="picker__sub">Código {{ s.code }} · {{ s.programName }}</span>
+          </li>
+        } @empty {
+          <li class="picker__state">Sin resultados.</li>
+        }
+      }
+    </ul>
+  }
+</div>

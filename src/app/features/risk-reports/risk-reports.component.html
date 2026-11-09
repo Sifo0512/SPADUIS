@@ -1,0 +1,85 @@
+<section class="page">
+  <!-- LIB: banner -> page-header / card simple / title -->
+  <header class="page-header">
+    <h1>Reportes por riesgo de deserción</h1>
+  </header>
+
+  <!-- LIB: panel lateral derecho (sidenav / drawer). Ver help-drawer.component.ts.
+       Se abre con el botón "Ayuda" de más abajo. -->
+  <app-help-drawer
+    [(open)]="helpOpen"
+    [ranges]="riskRanges()"
+    [loading]="rangesLoading()"
+    [error]="rangesError()"
+  />
+
+  <!-- LIB: dos botones "outlined/pill" con ícono (button + icon) -->
+  <div class="top-actions">
+    <button type="button" class="pill-btn" (click)="onHelp()">
+      Ayuda <app-icon name="help-circle" style="--icon-size: 14px" />
+    </button>
+    <button type="button" class="pill-btn" [disabled]="!selectedProgram() || downloading()" (click)="onDownload()">
+      Descargar reporte <app-icon name="download" style="--icon-size: 14px" />
+    </button>
+  </div>
+
+  <!-- LIB: 3 tarjetas clicables (ver quick-cards.component.ts) -->
+  <app-quick-cards [cards]="quickCards" (cardClick)="onQuickCard($event)" />
+
+  <div class="layout" [class.collapsed]="sidebarCollapsed()">
+    <!-- LIB: panel lateral con lista de programas (ver program-sidebar.component.ts) -->
+    <app-program-sidebar
+      class="sidebar"
+      [programs]="programs()"
+      [selectedId]="selectedProgramId()"
+      [collapsed]="sidebarCollapsed()"
+      [loading]="programsLoading()"
+      (selectProgram)="onSelectProgram($event)"
+      (toggleCollapse)="onToggleSidebar()"
+    />
+
+    <!-- LIB: contenedor con borde redondeado -> card / panel / surface -->
+    <section class="panel">
+      <h2>Listado de estudiantes de {{ selectedProgram()?.name ?? '...' }}</h2>
+
+      <!-- LIB: buscador (search-input) + 2 dropdowns (dropdown / select) -->
+      <div class="filters">
+        <app-search-input class="filter-search" variant="underline" placeholder="Filtrar registros" (valueChange)="onSearch($event)" />
+        <app-filter-dropdown
+          label="Nivel de riesgo"
+          allLabel="Todos los niveles"
+          [options]="riskOptions"
+          [value]="risk()"
+          (valueChange)="onRiskChange($event)"
+        />
+        <app-filter-dropdown
+          label="Semestre"
+          allLabel="Todos los semestres"
+          [options]="semesterOptions"
+          [value]="semester()"
+          (valueChange)="onSemesterChange($event)"
+        />
+      </div>
+
+      @if (error()) {
+        <p class="error" role="alert">
+          {{ error() }}
+          <button type="button" class="link-btn" (click)="retry()">Reintentar</button>
+        </p>
+      }
+
+      <!-- LIB: <app-mat-table-full [options]="tableOptions" (view)="onView($event)" (add)="onCreateRecord($event)" ... /> -->
+      <app-students-table
+        [rows]="students()"
+        [total]="total()"
+        [page]="page()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        [loading]="loading()"
+        (pageChange)="onPageChange($event)"
+        (view)="onView($event)"
+        (createRecord)="onCreateRecord($event)"
+      />
+    </section>
+  </div>
+</section>

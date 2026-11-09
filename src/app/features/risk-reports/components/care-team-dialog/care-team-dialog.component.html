@@ -1,0 +1,52 @@
+<!-- LIB: dialog / modal de la librería. -->
+<app-dialog
+  [title]="team() ? 'Editar equipo' : 'Crear equipo'"
+  [minimizable]="true"
+  actionsAlign="center"
+  (closed)="dismiss.emit()"
+>
+  <!-- novalidate: las validaciones las hace Angular, no el navegador. -->
+  <form id="care-team-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <!-- LIB: input de texto -->
+    <app-field label="Nombre" icon="tag" controlId="team-name" [control]="form.controls.name">
+      <input
+        id="team-name"
+        type="text"
+        formControlName="name"
+        autocomplete="off"
+        data-autofocus
+        [attr.maxlength]="nameMax"
+      />
+    </app-field>
+
+    <div class="row">
+      <!-- LIB: datepicker -->
+      <app-field label="Fecha desde" kind="date" controlId="team-from" [control]="form.controls.validFrom">
+        <input id="team-from" type="date" formControlName="validFrom" />
+      </app-field>
+
+      <!-- LIB: datepicker. Opcional: vacío = sin fecha de fin. -->
+      <app-field label="Fecha hasta" kind="date" controlId="team-to" [control]="form.controls.validTo">
+        <input
+          id="team-to"
+          type="date"
+          formControlName="validTo"
+          [attr.min]="fromDate() || null"
+        />
+      </app-field>
+    </div>
+
+    @if (error()) {
+      <p class="alert" role="alert">{{ error() }}</p>
+    }
+  </form>
+
+  <!-- LIB: botón outlined (Cancelar) y botón primary/filled (Guardar).
+       `dialogFooter` los manda a la zona de botones del diálogo. -->
+  <button dialogFooter type="button" class="btn-pill" [disabled]="saving()" (click)="dismiss.emit()">
+    Cancelar
+  </button>
+  <button dialogFooter type="submit" form="care-team-form" class="btn-pill btn-pill--filled" [disabled]="saving()">
+    {{ saving() ? 'Guardando...' : 'Guardar' }}
+  </button>
+</app-dialog>

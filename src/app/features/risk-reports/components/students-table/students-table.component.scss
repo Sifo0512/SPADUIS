@@ -1,0 +1,120 @@
+:host {
+  display: block;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  transition: opacity 0.15s;
+
+  &.is-loading {
+    opacity: 0.55;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  padding: 14px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+td {
+  padding: 10px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.col-student {
+  max-width: 220px;
+}
+
+.col-actions {
+  width: 140px;
+  text-align: left;
+}
+
+td.col-actions {
+  white-space: nowrap;
+}
+
+.state {
+  padding: 28px 14px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--green);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--green-soft);
+  }
+
+  &:disabled {
+    color: #b5b5b5;
+    cursor: default;
+  }
+
+  &.nav {
+    color: var(--text);
+
+    &:disabled {
+      color: #b5b5b5;
+    }
+  }
+}
+
+.paginator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 14px;
+  font-size: 11px;
+}
+
+.select-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  select {
+    appearance: none;
+    width: 58px;
+    height: 40px;
+    padding: 0 26px 0 12px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--text);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  app-icon {
+    position: absolute;
+    right: 6px;
+    pointer-events: none;
+  }
+}
+
+.range {
+  margin: 0 8px;
+}
