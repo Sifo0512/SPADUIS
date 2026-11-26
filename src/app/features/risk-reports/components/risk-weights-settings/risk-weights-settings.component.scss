@@ -1,0 +1,11 @@
+:host { display: block; }
+.hint { margin: 0 0 16px; font-size: 13px; color: var(--text-muted); }
+.divisor { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 14px; }
+.divisor input, .wts input[type='number'] { width: 90px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+.table-wrap { overflow-x: auto; margin-bottom: 16px; }
+.wts { border-collapse: collapse; width: 100%; }
+.wts th, .wts td { padding: 8px 12px 8px 0; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
+.wts .off td { color: var(--text-muted); }
+.ok { color: var(--green-dark); font-size: 13px; }
+.error { color: var(--danger); font-size: 13px; }
+.state { color: var(--text-muted); }

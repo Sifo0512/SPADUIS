@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RiskLevel } from '../../models/student-risk.model';
 
+// Clase CSS por nivel ("Muy alto" tiene un espacio, por eso no se arma con el texto).
 const CLASS_BY_LEVEL: Record<RiskLevel | 'Crítico', string> = {
   Bajo: 'tag--low',
   Medio: 'tag--medium',
@@ -9,6 +10,11 @@ const CLASS_BY_LEVEL: Record<RiskLevel | 'Crítico', string> = {
   Crítico: 'tag--very-high',
 };
 
+/**
+ * LIB: reemplazar por el tag / chip / badge de estado de la librería.
+ * Mapeo de variantes: Bajo -> success (verde), Medio -> info (azul),
+ * Alto -> warning (naranja), Muy alto -> error/danger (rojo).
+ */
 @Component({
   selector: 'app-risk-tag',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,38 +22,34 @@ const CLASS_BY_LEVEL: Record<RiskLevel | 'Crítico', string> = {
   styles: `
     .tag {
       display: inline-block;
-      padding: 2px 10px;
+      padding: 1px 8px;
       font-size: 12px;
-      font-weight: 600;
       line-height: 18px;
+      color: var(--text);
       white-space: nowrap;
       border: 1px solid;
-      border-radius: 6px;
+      border-radius: 4px;
     }
-    /* Estilos alineados con la referencia visual */
     .tag--low {
-      background: #e6f4ea;
-      color: #137333;
-      border-color: #a8dab5;
+      background: #e3f6d8;
+      border-color: #7cc65a;
     }
     .tag--medium {
-      background: #e3f2fd;
-      color: #1976d2;
-      border-color: #90caf9;
+      background: #dcecff;
+      border-color: #5b9be6;
     }
     .tag--high {
-      background: #fef7e0;
-      color: #b06000;
-      border-color: #fdd663;
+      background: #fff1d6;
+      border-color: #e6a23c;
     }
     .tag--very-high {
-      background: #fce8e6;
-      color: #c5221f;
-      border-color: #f87171;
+      background: #fddede;
+      border-color: #e06a6a;
     }
   `,
 })
 export class RiskTagComponent {
+  /** Nivel de riesgo del estudiante, o "Crítico" (nivel de una alerta). */
   readonly level = input.required<RiskLevel | 'Crítico'>();
   protected readonly cssClass = computed(() => `tag ${CLASS_BY_LEVEL[this.level()]}`);
 }

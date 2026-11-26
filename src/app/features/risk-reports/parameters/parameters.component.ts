@@ -10,6 +10,8 @@ import { SearchInputComponent } from '../../../shared/search-input/search-input.
 import { SideListComponent, SideListItem } from '../../../shared/side-list/side-list.component';
 import { CareTeamDialogComponent } from '../components/care-team-dialog/care-team-dialog.component';
 import { CareTeamsTableComponent } from '../components/care-teams-table/care-teams-table.component';
+import { RiskRangesSettingsComponent } from '../components/risk-ranges-settings/risk-ranges-settings.component';
+import { RiskWeightsSettingsComponent } from '../components/risk-weights-settings/risk-weights-settings.component';
 import { CareTeam, CareTeamPayload } from '../models/care-team.model';
 import { RiskReportsService } from '../services/risk-reports.service';
 import { RR_PATHS } from '../risk-reports.paths';
@@ -22,6 +24,7 @@ const SECTIONS: SideListItem[] = [
   { id: 'care-teams', label: 'Equipos de atención' },
   { id: 'agents', label: 'Agentes' },
   { id: 'risk-categories', label: 'Categorías de riesgo' },
+  { id: 'risk-weights', label: 'Ponderadores del modelo' },
   { id: 'alert-params', label: 'Parámetros de alerta' },
 ];
 
@@ -47,6 +50,8 @@ const SECTIONS: SideListItem[] = [
     CareTeamsTableComponent,
     CareTeamDialogComponent,
     DialogComponent,
+    RiskRangesSettingsComponent,
+    RiskWeightsSettingsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Activa el tema del módulo (variables y botones); ver risk-reports.theme.scss.

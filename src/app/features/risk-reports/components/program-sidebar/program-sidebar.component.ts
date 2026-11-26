@@ -46,7 +46,7 @@ import { Program } from '../../models/program.model';
               [attr.aria-current]="p.id === selectedId() ? 'true' : null"
               (click)="selectProgram.emit(p)"
             >
-              <span class="count">{{ p.studentsCount }}</span>
+              <span class="count">{{ p.code }}</span>
               <span class="name">{{ p.name }}</span>
             </button>
           </li>
@@ -70,6 +70,10 @@ export class ProgramSidebarComponent {
   protected readonly term = signal('');
   protected readonly filtered = computed(() => {
     const t = this.term().trim().toLowerCase();
-    return this.programs().filter((p) => p.name.toLowerCase().includes(t));
-  });
-}
+      return this.programs().filter(
+      (p) =>
+      p.name.toLowerCase().includes(t) ||
+      String(p.code).toLowerCase().includes(t)
+  );
+})
+};

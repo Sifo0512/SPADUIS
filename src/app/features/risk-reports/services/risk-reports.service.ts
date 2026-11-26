@@ -7,6 +7,8 @@ import { STUDENTS_BY_PROGRAM_MOCK } from '../mocks/students.mock';
 import { PROGRAMS_MOCK } from '../mocks/programs.mock';
 import { RISK_RANGES_MOCK } from '../mocks/risk-ranges.mock';
 import { RiskRange } from '../models/risk-range.model';
+import { RISK_MODEL_MOCK } from '../mocks/risk-model.mock';
+import { RiskModel, RiskModelPayload } from '../models/risk-model.model';
 import { CARE_TEAMS_MOCK } from '../mocks/care-teams.mock';
 import { CareTeam, CareTeamPayload, CareTeamsQuery } from '../models/care-team.model';
 import { ALERTS_MOCK } from '../mocks/alerts.mock';
@@ -95,12 +97,50 @@ export class RiskReportsService {
    * BACK: estos rangos probablemente se configuran en la pantalla "Parámetros",
    * así que conviene pedirlos al backend en vez de dejarlos fijos en el front.
    */
+  /** Copias en memoria: en modo mock, lo que se guarda en Parámetros cambia los cálculos. */
+  private mockRanges: RiskRange[] = RISK_RANGES_MOCK.map((r) => ({ ...r }));
+  private mockModel: RiskModel = structuredClone(RISK_MODEL_MOCK);
+
   getRiskRanges(): Observable<RiskRange[]> {
     if (environment.useMock) {
-      return of(RISK_RANGES_MOCK).pipe(delay(300));
+      return of(this.mockRanges.map((r) => ({ ...r }))).pipe(delay(300));
     }
     // BACK: GET /risk-reports/risk-ranges
     return this.http.get<RiskRange[]>(`${this.baseUrl}/risk-ranges`);
+  }
+
+  /** Guarda los 4 rangos (contiguos, de 0 a 1). El backend responde 422 si no son válidos. */
+  updateRiskRanges(ranges: RiskRange[]): Observable<RiskRange[]> {
+    if (environment.useMock) {
+      this.mockRanges = ranges.map((r) => ({ ...r }));
+      return of(ranges).pipe(delay(300));
+    }
+    // BACK: PUT /risk-reports/risk-ranges
+    return this.http.put<RiskRange[]>(`${this.baseUrl}/risk-ranges`, ranges);
+  }
+
+  /** Ponderadores, divisor y máximos del modelo de riesgo. */
+  getRiskModel(): Observable<RiskModel> {
+    if (environment.useMock) {
+      return of(structuredClone(this.mockModel)).pipe(delay(300));
+    }
+    // BACK: GET /risk-reports/risk-model
+    return this.http.get<RiskModel>(`${this.baseUrl}/risk-model`);
+  }
+
+  /** Guarda divisor, ponderadores y términos activos. Devuelve el modelo ya recalculado. */
+  updateRiskModel(payload: RiskModelPayload): Observable<RiskModel> {
+    if (environment.useMock) {
+      const m = this.mockModel;
+      m.divisor = payload.divisor;
+      for (const t of payload.terms) {
+        const term = m.terms.find((x) => x.code === t.code);
+        if (term) { term.weight = t.weight; term.active = t.active; }
+      }
+      return of(structuredClone(m)).pipe(delay(300));
+    }
+    // BACK: PUT /risk-reports/risk-model
+    return this.http.put<RiskModel>(`${this.baseUrl}/risk-model`, payload);
   }
 
   // ------------------------------------------------------------------
@@ -358,7 +398,7 @@ export class RiskReportsService {
   getStudentDashboard(id: number): Observable<StudentDashboard> {
     if (environment.useMock) {
       const s = this.mockAllStudents().find((x) => x.id === id);
-      return s ? of(mockDashboard(s)).pipe(delay(300)) : throwError(() => new Error('404'));
+      return s ? of(mockDashboard(s, this.mockModel, this.mockRanges)).pipe(delay(300)) : throwError(() => new Error('404'));
     }
     // BACK: GET /risk-reports/students/{id}/dashboard
     return this.http.get<StudentDashboard>(`${this.baseUrl}/students/${id}/dashboard`);
@@ -368,7 +408,7 @@ export class RiskReportsService {
   getDimensionDetail(id: number, dimension: DimensionId): Observable<DimensionDetail> {
     if (environment.useMock) {
       const s = this.mockAllStudents().find((x) => x.id === id);
-      return s ? of(mockDimension(s, dimension)).pipe(delay(200)) : throwError(() => new Error('404'));
+      return s ? of(mockDimension(s, dimension, this.mockModel, this.mockRanges)).pipe(delay(200)) : throwError(() => new Error('404'));
     }
     // BACK: GET /risk-reports/students/{id}/dimensions/{dimension}
     return this.http.get<DimensionDetail>(`${this.baseUrl}/students/${id}/dimensions/${dimension}`);
@@ -378,7 +418,7 @@ export class RiskReportsService {
   getRiskCalculation(id: number): Observable<RiskCalculation> {
     if (environment.useMock) {
       const s = this.mockAllStudents().find((x) => x.id === id);
-      return s ? of(mockCalculation(s)).pipe(delay(200)) : throwError(() => new Error('404'));
+      return s ? of(mockCalculation(s, this.mockModel, this.mockRanges)).pipe(delay(200)) : throwError(() => new Error('404'));
     }
     // BACK: GET /risk-reports/students/{id}/risk-calculation
     return this.http.get<RiskCalculation>(`${this.baseUrl}/students/${id}/risk-calculation`);

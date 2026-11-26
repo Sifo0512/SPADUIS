@@ -7,5 +7,5 @@ export const environment = {
 
   // true  -> el servicio responde con datos mock (no necesita backend).
   // false -> el servicio hace las peticiones HTTP reales.
-  useMock: true,
+  useMock: false,
 };

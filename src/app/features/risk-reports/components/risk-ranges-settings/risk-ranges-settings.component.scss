@@ -1,0 +1,9 @@
+:host { display: block; }
+.hint { margin: 0 0 16px; font-size: 13px; color: var(--text-muted); }
+.rng { border-collapse: collapse; margin-bottom: 16px; min-width: 320px; }
+.rng th, .rng td { padding: 8px 16px 8px 0; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
+.rng input { width: 90px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+.ro { color: var(--text-muted); }
+.ok { color: var(--green-dark); font-size: 13px; }
+.error { color: var(--danger); font-size: 13px; }
+.state { color: var(--text-muted); }
