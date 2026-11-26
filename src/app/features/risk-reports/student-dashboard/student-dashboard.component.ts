@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,7 +17,20 @@ import {
   RiskCalculation,
   StudentDashboard,
 } from '../models/dashboard.model';
+import { IconName } from '../../../shared/icon/icon.component';
 import { RiskLevel } from '../models/student-risk.model';
+
+/** Una fila de la tabla de cálculo (los términos de un mismo grupo, p. ej. las facultades, van en una sola). */
+interface CalcRow {
+  key: string;
+  label: string;
+  value: string;
+  weight: number | null;
+  applies: boolean | null;
+  dataAvailable: boolean;
+  contribution: number | null;
+  masked: boolean;
+}
 import { RR_PATHS } from '../risk-reports.paths';
 import { RiskReportsService } from '../services/risk-reports.service';
 
@@ -56,6 +69,42 @@ export class StudentDashboardComponent {
   protected readonly dimensionLoading = signal(false);
   protected readonly calculation = signal<RiskCalculation | null>(null);
   protected readonly calculationOpen = signal(false);
+
+  protected readonly icons: Record<DimensionId, IconName> = {
+    academica: 'graduation-cap',
+    financiera: 'wallet',
+    bienestar: 'heart',
+    sea: 'life-buoy',
+  };
+
+  /**
+   * Filas de la tabla: los términos excluyentes de un mismo grupo (las 3 facultades) se muestran como UNA fila,
+   * con la facultad del estudiante y si aplica o no.
+   */
+  protected readonly rows = computed<CalcRow[]>(() => {
+    const out: CalcRow[] = [];
+    const seen = new Map<string, CalcRow>();
+    for (const t of this.calculation()?.terms ?? []) {
+      if (!t.group) {
+        out.push({ key: t.code, label: t.variableLabel, value: t.value, weight: t.weight, applies: t.applies,
+          dataAvailable: t.dataAvailable, contribution: t.contribution, masked: t.masked });
+        continue;
+      }
+      let row = seen.get(t.group);
+      if (!row) {
+        row = { key: t.group, label: t.variableLabel, value: t.value, weight: null, applies: t.applies === null ? null : false,
+          dataAvailable: t.dataAvailable, contribution: t.contribution === null ? null : 0, masked: t.masked };
+        seen.set(t.group, row);
+        out.push(row);
+      }
+      if (t.applies) {
+        row.applies = true;
+        row.weight = t.weight;
+        row.contribution = t.contribution;
+      }
+    }
+    return out;
+  });
 
   protected readonly exporting = signal<'one' | 'all' | null>(null);
   protected readonly exportError = signal<string | null>(null);

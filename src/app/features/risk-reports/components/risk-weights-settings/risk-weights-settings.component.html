@@ -1,0 +1,40 @@
+@if (loading()) {
+  <p class="state" role="status">Cargando...</p>
+} @else if (model(); as m) {
+  <p class="hint">
+    Cada variable aporta <strong>1 × ponderador</strong> si se cumple y 0 si no (Saber ciencias naturales:
+    1 + (1 − ponderador) × (100 − puntaje)). El índice es la suma de los aportes dividida por el divisor.
+    Suma máxima con los términos activos: <strong>{{ m.theoreticalMax }}</strong>.
+  </p>
+
+  <label class="divisor">
+    Divisor
+    <input type="number" min="0.01" step="0.01" [ngModel]="m.divisor" (ngModelChange)="setDivisor($event)" />
+  </label>
+
+  <div class="table-wrap">
+    <table class="wts">
+      <thead><tr><th>Activo</th><th>Variable</th><th>Regla</th><th>Dimensión</th><th>Ponderador</th></tr></thead>
+      <tbody>
+        @for (t of m.terms; track t.code) {
+          <tr [class.off]="!t.active">
+            <td><input type="checkbox" [ngModel]="t.active" (ngModelChange)="patch(t.code, { active: $event })"
+                       [attr.aria-label]="'Activar ' + t.label" /></td>
+            <td>{{ t.label }}</td>
+            <td>{{ t.rule }}</td>
+            <td>{{ t.dimensionTitle }}</td>
+            <td><input type="number" min="0" step="0.01" [ngModel]="t.weight"
+                       (ngModelChange)="patch(t.code, { weight: $event })" [attr.aria-label]="'Ponderador ' + t.label" /></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (message(); as msg) {
+    <p [class]="msg.ok ? 'ok' : 'error'" [attr.role]="msg.ok ? 'status' : 'alert'">{{ msg.text }}</p>
+  }
+  <button type="button" class="btn-pill btn-pill--filled" [disabled]="saving()" (click)="save()">
+    {{ saving() ? 'Guardando...' : 'Guardar ponderadores' }}
+  </button>
+}

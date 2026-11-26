@@ -53,11 +53,10 @@
           <div><dt>Nivel académico:</dt> <dd>{{ d.student.academicLevel ?? '--' }}</dd></div>
           <div><dt>Correo:</dt> <dd>{{ d.student.email || '--' }}</dd></div>
           <div><dt>Teléfono:</dt> <dd>{{ d.student.phone || '--' }}</dd></div>
+          <div><dt>Nacimiento:</dt> <dd>{{ d.student.birthDate || '--' }}</dd></div>
+          <div><dt>Edad:</dt> <dd>{{ d.student.age ?? '--' }}</dd></div>
           <div><dt>Ingreso:</dt> <dd>{{ d.student.admissionDate || '--' }}</dd></div>
         </dl>
-        <button type="button" class="link" (click)="openDimension('identificacion')">
-          Ver datos de identificación
-        </button>
       </div>
 
       <div class="index index--{{ tone(d.risk.level) }}">
@@ -67,9 +66,6 @@
         <button type="button" class="btn-pill" (click)="openCalculation()">
           <app-icon name="calculator" style="--icon-size: 14px" /> Cálculo del índice
         </button>
-        @if (!d.risk.interceptCalibrated) {
-          <small class="muted">Intercepto del modelo sin calibrar (provisional).</small>
-        }
       </div>
     </section>
 
@@ -91,10 +87,9 @@
     <h2 class="title">Variables por dimensión</h2>
     <div class="dims">
       @for (c of d.dimensions; track c.id) {
-        @if (c.id !== 'identificacion') {
-          <article [class]="'card dim risk-' + tone(c.level)" [attr.data-dim]="c.id">            
+          <article class="card dim" [attr.data-dim]="c.id">
             <header>
-              <span class="dim__icon"><app-icon [name]="c.id === 'academica' ? 'graduation-cap' : c.id === 'financiera' ? 'wallet' : 'heart'" /></span>
+              <span class="dim__icon"><app-icon [name]="icons[c.id]" /></span>
               <h3>{{ c.title }}</h3>
               @if (c.level) { <app-risk-tag [level]="level(c.level)" /> }
             </header>
@@ -121,7 +116,6 @@
               Ver todas las variables ({{ c.variableCount }})
             </button>
           </article>
-        }
       }
     </div>
   } @else if (!error()) {
@@ -147,7 +141,6 @@
           <div class="vars__row">
             <dt>
               {{ v.label }}
-              @if (v.derived) { <em>derivada</em> }
               @if (v.extra) { <em>extra</em> }
             </dt>
             <dd [class.masked]="v.masked">
@@ -169,27 +162,35 @@
   <app-dialog title="Cálculo del índice de riesgo" size="lg" (closed)="closeCalculation()">
     @if (calculation(); as c) {
       <p class="dlg-lead">
-        índice = 1 / (1 + e<sup>−(intercepto + Σ coeficiente · x)</sup>) &nbsp;→&nbsp;
-        <strong>{{ c.index.toFixed(2) }}</strong> <app-risk-tag [level]="level(c.level)" />
-      </p>
-      <p class="dlg-note">
-        Intercepto: {{ c.intercept.toFixed(3) }}{{ c.interceptCalibrated ? '' : ' (provisional)' }} ·
-        Logit: {{ c.logit.toFixed(3) }}
+        Índice de riesgo: <strong>{{ c.index.toFixed(2) }}</strong> <app-risk-tag [level]="level(c.level)" />
       </p>
       <div class="table-wrap">
         <table class="terms">
           <thead>
-            <tr><th>Variable</th><th>Regla</th><th>Valor</th><th>OR</th><th>Aplica</th><th>Aporte</th></tr>
+            <tr><th>Variable</th><th>Valor</th><th>Ponderador</th><th>Aplica</th><th>Aporte</th></tr>
           </thead>
           <tbody>
-            @for (t of c.terms; track t.code) {
+            @for (t of rows(); track t.key) {
               <tr [class.on]="t.applies">
-                <td>{{ t.variableLabel }}</td>
-                <td>{{ t.rule }}</td>
+                <td>{{ t.label }}</td>
                 <td>{{ t.value }}</td>
-                <td>{{ t.oddsRatio.toFixed(2) }}</td>
+                <td>{{ t.weight === null ? '--' : t.weight }}</td>
                 <td>{{ t.masked ? 'Restringido' : !t.dataAvailable ? 'Sin dato' : t.applies ? 'Sí' : 'No' }}</td>
-                <td>{{ t.contribution === null ? '--' : t.contribution.toFixed(3) }}</td>
+                <td>{{ t.contribution === null ? '--' : t.contribution.toFixed(2) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <h3 class="dlg-sub">Índice por dimensión</h3>
+      <div class="table-wrap">
+        <table class="terms">
+          <thead><tr><th>Dimensión</th><th>Índice</th></tr></thead>
+          <tbody>
+            @for (x of c.dimensions; track x.id) {
+              <tr>
+                <td>{{ x.title }}</td>
+                <td>{{ x.index === null ? 'Sin variables en el modelo' : x.index.toFixed(2) + ' · ' + x.level }}</td>
               </tr>
             }
           </tbody>

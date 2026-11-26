@@ -65,59 +65,25 @@
 .masked { color: var(--text-muted); font-style: italic; }
 
 .dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-
-/* ==========================================================
-   MODIFICACIÓN: Estilos adaptados para tarjetas y barras de riesgo
-   ========================================================== */
 .dim {
   display: flex; flex-direction: column; gap: 12px; min-width: 0;
   header { display: flex; align-items: center; gap: 10px; }
   h3 { flex: 1; margin: 0; font-size: 14px; }
-  
-  &__icon { 
-    display: grid; place-items: center; width: 34px; height: 34px; 
-    border-radius: 8px; 
-  }
+  &__icon { display: grid; place-items: center; width: 34px; height: 34px; color: var(--green-dark); background: var(--green-soft); border-radius: 8px; }
   .btn-pill { align-self: flex-start; }
-
-  /* Dinámica de colores de iconos y barras según la clase de la tarjeta */
-  &.risk-low {
-    .dim__icon { background-color: #e6f4ea; color: #137333; }
-    .bar-fill { background-color: #137333; }
-  }
-
-  &.risk-medium {
-    .dim__icon { background-color: #e3f2fd; color: #1976d2; }
-    .bar-fill { background-color: #1976d2; }
-  }
-
-  &.risk-high {
-    .dim__icon { background-color: #fef7e0; color: #b06000; }
-    .bar-fill { background-color: #e6a23c; }
-  }
-
-  &.risk-very-high {
-    .dim__icon { background-color: #fce8e6; color: #c5221f; }
-    .bar-fill { background-color: #e06a6a; }
-  }
 }
-
 .gauge { display: flex; align-items: center; gap: 12px;
   &__num { font-size: 22px; font-weight: 700; small { font-size: 12px; font-weight: 400; color: var(--text-muted); } }
 }
 .bar-track { flex: 1; height: 8px; overflow: hidden; background: #e8e8e8; border-radius: 4px; }
-.bar-fill { height: 100%; border-radius: 4px; }
-
-/* Clases de respaldo por si se usan de forma independiente */
-.bar-fill--low { background: #137333; } 
-.bar-fill--medium { background: #1976d2; }
-.bar-fill--high { background: #e6a23c; } 
-.bar-fill--very-high { background: #e06a6a; }
-
+.bar-fill { height: 100%; border-radius: 4px;
+  &--low { background: #7cc65a; } &--medium { background: #5b9be6; }
+  &--high { background: #e6a23c; } &--very-high { background: #e06a6a; }
+}
 .highlights { display: grid; gap: 6px; margin: 0; font-size: 12px;
   div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 6px; border-bottom: 1px dashed var(--border); }
   dt { color: var(--text-muted); }
-  dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+  dd { margin: 0; font-weight: 600; text-align: right; flex-shrink: 0; max-width: 55%; overflow-wrap: break-word; }
 }
 
 .dlg-lead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 13px; }
@@ -133,3 +99,4 @@
   th { position: sticky; top: 0; background: var(--surface); }
   tr.on td { background: #fff4de; font-weight: 600; }
 }
+.dlg-sub { margin: 20px 0 4px; font-size: 14px; font-weight: 600; }

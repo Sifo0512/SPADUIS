@@ -20,7 +20,9 @@
 
     <!-- LIB: contenedor con borde redondeado -> card / panel / surface -->
     <section class="panel">
-      <h2>Listado de {{ selectedSection().label.toLowerCase() }}</h2>
+      <h2>
+        {{ selectedId() === 'care-teams' ? 'Listado de ' + selectedSection().label.toLowerCase() : selectedSection().label }}
+      </h2>
 
       @if (selectedId() === 'care-teams') {
         <div class="filters">
@@ -56,6 +58,10 @@
           (edit)="openEdit($event)"
           (remove)="openDelete($event)"
         />
+      } @else if (selectedId() === 'risk-categories') {
+        <app-risk-ranges-settings />
+      } @else if (selectedId() === 'risk-weights') {
+        <app-risk-weights-settings />
       } @else {
         <!-- TODO: construir "Agentes", "Categorías de riesgo" y "Parámetros de alerta" cuando haya mockup.
              Cada una tendrá su propio servicio (BACK) y su tabla (LIB). -->
